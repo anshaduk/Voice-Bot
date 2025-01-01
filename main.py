@@ -16,19 +16,21 @@ def take_command():
     try:
         with sr.Microphone() as speech:
             print('Listening...')
-            voice = listener.listen(speech)
-            command = listener.recognize_bing(voice)
+            voice = listener.listen(speech,timeout=50,phrase_time_limit=60)
+            command = listener.recognize_google(voice)
             command = command.lower()
             if 'alexa' in command:
                 command = command.replace('alexa','')
                 print(command)
-    
-    except:
-        pass
+    except Exception as e:
+        # print("Error: ", e)
+        command=''
     return command
 
 def run_alexa():
     command = take_command()
+    if not command:
+        return
     print(command)
     if 'play' in command:
         song = command.replace('play','')
@@ -39,7 +41,7 @@ def run_alexa():
         talk('Current time is ' + time)
     elif 'who' in command:
         person = command.replace('who','')
-        info = wikipedia.summary(person,5)
+        info = wikipedia.summary(person,1)
         print(info)
         talk(info)
     elif 'date' in command:
@@ -48,11 +50,16 @@ def run_alexa():
         talk('I am in a relationship')
     elif 'joke' in command:
         talk(pyjokes.get_joke())
+    elif 'stop' in command:
+        talk('Goodbye!')
+        return False
     else:
         talk('Please say the command again.')
+    return True
 
 while(True):
-    run_alexa()
+    if not run_alexa():
+        break
 
 
 
